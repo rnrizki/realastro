@@ -1,0 +1,935 @@
+{
+  "project": {
+    "name": "medusa-astro-starter",
+    "description": "A blazing fast MedusaJS + Astro storefront starter with React islands, optimized for sub-second LCP and 95+ Lighthouse scores. Monorepo setup using Turborepo with pnpm workspaces.",
+    "repository_structure": {
+      "root": "/",
+      "apps": {
+        "backend": "/apps/backend (provided - MedusaJS v2 backend from dtc-starter)",
+        "storefront": "/apps/storefront (to be created - Astro + React islands)"
+      },
+      "packages": {
+        "shared": "/packages/shared (optional - shared types/utils)"
+      },
+      "config_files": [
+        "turbo.json",
+        "pnpm-workspace.yaml",
+        "package.json",
+        ".gitignore",
+        ".env.example"
+      ]
+    },
+    "tech_stack": {
+      "storefront": {
+        "framework": "Astro 5.x",
+        "ui_islands": "Preact (migrated from React for performance)",
+        "styling": "Tailwind CSS 3.x",
+        "state_management": "Nanostores",
+        "medusa_client": "@medusajs/js-sdk",
+        "deployment_target": "Cloudflare Pages (static)"
+      },
+      "backend": {
+        "framework": "MedusaJS v2",
+        "database": "PostgreSQL",
+        "note": "Provided from dtc-starter, no modifications needed initially"
+      },
+      "monorepo": {
+        "tool": "Turborepo",
+        "package_manager": "pnpm"
+      }
+    },
+    "performance_targets": {
+      "lighthouse_score": "95+",
+      "lcp": "<1.5s",
+      "fid_inp": "<100ms",
+      "cls": "<0.05",
+      "total_js_budget": "<50KB gzipped",
+      "ttfb": "<200ms from edge"
+    }
+  },
+  "assumptions": [
+    "MedusaJS backend is already set up at /apps/backend from the dtc-starter",
+    "The backend has seed data with products, collections, and at least one region",
+    "PostgreSQL database is running and configured",
+    "A publishable API key exists in the Medusa admin",
+    "pnpm is installed globally",
+    "Node.js v20+ is available"
+  ],
+  "init_script": {
+    "description": "Script to bootstrap the development environment",
+    "steps": [
+      "cd to project root",
+      "pnpm install (installs all workspace dependencies)",
+      "Copy .env.example to .env in /apps/storefront",
+      "Start backend: pnpm --filter backend dev",
+      "Start storefront: pnpm --filter storefront dev",
+      "Backend runs at http://localhost:9000",
+      "Storefront runs at http://localhost:4321"
+    ]
+  },
+  "feature_list": [
+    {
+      "id": 1,
+      "category": "monorepo-setup",
+      "priority": "critical",
+      "description": "Root turbo.json configures build pipeline with proper task dependencies",
+      "steps": [
+        "Create turbo.json at project root",
+        "Configure build task that runs storefront build",
+        "Configure dev task for parallel development",
+        "Configure lint task for both apps",
+        "Verify pnpm turbo dev starts both apps"
+      ],
+      "passes": true
+    },
+    {
+      "id": 2,
+      "category": "monorepo-setup",
+      "priority": "critical",
+      "description": "pnpm-workspace.yaml defines workspace packages correctly",
+      "steps": [
+        "Create pnpm-workspace.yaml at root",
+        "Include apps/* in workspace packages",
+        "Include packages/* in workspace packages",
+        "Verify pnpm install works from root"
+      ],
+      "passes": true
+    },
+    {
+      "id": 3,
+      "category": "monorepo-setup",
+      "priority": "critical",
+      "description": "Root package.json has workspace scripts for dev, build, and lint",
+      "steps": [
+        "Create root package.json with private: true",
+        "Add dev script that runs turbo dev",
+        "Add build script that runs turbo build",
+        "Add lint script that runs turbo lint",
+        "Add clean script to remove build artifacts"
+      ],
+      "passes": true
+    },
+    {
+      "id": 4,
+      "category": "storefront-setup",
+      "priority": "critical",
+      "description": "Astro project initialized with React and Tailwind integrations",
+      "steps": [
+        "Create /apps/storefront directory",
+        "Initialize Astro project with minimal template",
+        "Add @astrojs/react integration",
+        "Add @astrojs/tailwind integration",
+        "Configure astro.config.mjs with static output"
+      ],
+      "passes": true
+    },
+    {
+      "id": 5,
+      "category": "storefront-setup",
+      "priority": "critical",
+      "description": "Cloudflare adapter configured for static deployment",
+      "steps": [
+        "Install @astrojs/cloudflare",
+        "Configure adapter in astro.config.mjs",
+        "Set output to static",
+        "Configure image service for Cloudflare"
+      ],
+      "passes": true
+    },
+    {
+      "id": 6,
+      "category": "storefront-setup",
+      "priority": "critical",
+      "description": "MedusaJS SDK client configured with environment variables",
+      "steps": [
+        "Install @medusajs/js-sdk",
+        "Create src/lib/medusa.ts with SDK initialization",
+        "Read MEDUSA_BACKEND_URL from environment",
+        "Read MEDUSA_PUBLISHABLE_KEY from environment",
+        "Export typed helper functions for products, collections, cart"
+      ],
+      "passes": true
+    },
+    {
+      "id": 7,
+      "category": "storefront-setup",
+      "priority": "critical",
+      "description": "Environment variables template exists with all required vars",
+      "steps": [
+        "Create .env.example in /apps/storefront",
+        "Include MEDUSA_BACKEND_URL",
+        "Include MEDUSA_PUBLISHABLE_KEY",
+        "Include PUBLIC_MEDUSA_PUBLISHABLE_KEY for client-side",
+        "Document each variable with comments"
+      ],
+      "passes": true
+    },
+    {
+      "id": 8,
+      "category": "storefront-setup",
+      "priority": "high",
+      "description": "TypeScript configured with path aliases",
+      "steps": [
+        "Create tsconfig.json with strict mode",
+        "Configure @ alias pointing to src/",
+        "Ensure Astro and React types are included",
+        "Verify IDE autocompletion works"
+      ],
+      "passes": true
+    },
+    {
+      "id": 9,
+      "category": "storefront-setup",
+      "priority": "high",
+      "description": "Tailwind configured with minimal custom theme",
+      "steps": [
+        "Create tailwind.config.mjs",
+        "Configure content paths for Astro files",
+        "Disable unused core plugins for smaller CSS",
+        "Create src/styles/global.css with Tailwind directives"
+      ],
+      "passes": true
+    },
+    {
+      "id": 10,
+      "category": "layout",
+      "priority": "critical",
+      "description": "Base layout component with HTML structure and critical CSS",
+      "steps": [
+        "Create src/layouts/BaseLayout.astro",
+        "Include proper HTML5 doctype and meta tags",
+        "Add viewport meta for mobile",
+        "Include slot for page content",
+        "Add global styles import"
+      ],
+      "passes": true
+    },
+    {
+      "id": 11,
+      "category": "layout",
+      "priority": "high",
+      "description": "Header component with logo, navigation, and cart icon",
+      "steps": [
+        "Create src/components/astro/Header.astro",
+        "Add logo/site name linking to home",
+        "Add navigation links to Products and Collections",
+        "Include CartButton React island for cart count",
+        "Use semantic HTML (header, nav elements)"
+      ],
+      "passes": true
+    },
+    {
+      "id": 12,
+      "category": "layout",
+      "priority": "medium",
+      "description": "Footer component with basic links and copyright",
+      "steps": [
+        "Create src/components/astro/Footer.astro",
+        "Add footer navigation links",
+        "Include copyright text",
+        "Use semantic footer element"
+      ],
+      "passes": true
+    },
+    {
+      "id": 13,
+      "category": "homepage",
+      "priority": "critical",
+      "description": "Homepage displays hero section and featured products",
+      "steps": [
+        "Create src/pages/index.astro",
+        "Fetch featured products at build time using SDK",
+        "Display hero section with CTA",
+        "Show grid of featured ProductCards",
+        "Link to products page"
+      ],
+      "passes": true
+    },
+    {
+      "id": 14,
+      "category": "products",
+      "priority": "critical",
+      "description": "Product listing page shows all products in a grid",
+      "steps": [
+        "Create src/pages/products/index.astro",
+        "Fetch all products at build time",
+        "Display products in responsive grid",
+        "Each product links to its detail page",
+        "Show product image, title, and price"
+      ],
+      "passes": true
+    },
+    {
+      "id": 15,
+      "category": "products",
+      "priority": "critical",
+      "description": "Product card component displays product preview",
+      "steps": [
+        "Create src/components/astro/ProductCard.astro",
+        "Accept product as prop",
+        "Display thumbnail with lazy loading",
+        "Show product title",
+        "Show formatted price from first variant",
+        "Link entire card to product detail page"
+      ],
+      "passes": true
+    },
+    {
+      "id": 16,
+      "category": "products",
+      "priority": "critical",
+      "description": "Dynamic product detail pages generated at build time",
+      "steps": [
+        "Create src/pages/products/[handle].astro",
+        "Implement getStaticPaths to generate all product pages",
+        "Fetch individual product data",
+        "Handle 404 for non-existent products",
+        "Pass product data to page template"
+      ],
+      "passes": true
+    },
+    {
+      "id": 17,
+      "category": "products",
+      "priority": "critical",
+      "description": "Product detail page shows full product information",
+      "steps": [
+        "Display large product image with eager loading",
+        "Show product title as h1",
+        "Display formatted price",
+        "Render product description (handle HTML)",
+        "Include AddToCart React island"
+      ],
+      "passes": true
+    },
+    {
+      "id": 18,
+      "category": "products",
+      "priority": "high",
+      "description": "Product detail page handles multiple variants",
+      "steps": [
+        "Display variant selector if multiple variants exist",
+        "Show variant options (size, color, etc.)",
+        "Update price display when variant changes",
+        "Pass selected variant to AddToCart component"
+      ],
+      "passes": true
+    },
+    {
+      "id": 19,
+      "category": "products",
+      "priority": "medium",
+      "description": "Product image gallery supports multiple images",
+      "steps": [
+        "Display main product image",
+        "Show thumbnail strip if multiple images",
+        "Allow clicking thumbnails to change main image",
+        "Implement as React island for interactivity"
+      ],
+      "passes": true
+    },
+    {
+      "id": 20,
+      "category": "collections",
+      "priority": "high",
+      "description": "Collections listing page shows all collections",
+      "steps": [
+        "Create src/pages/collections/index.astro",
+        "Fetch all collections at build time",
+        "Display collections in grid or list",
+        "Show collection title and optional image",
+        "Link to individual collection pages"
+      ],
+      "passes": true
+    },
+    {
+      "id": 21,
+      "category": "collections",
+      "priority": "high",
+      "description": "Dynamic collection pages generated at build time",
+      "steps": [
+        "Create src/pages/collections/[handle].astro",
+        "Implement getStaticPaths for all collections",
+        "Fetch products belonging to collection",
+        "Display collection title and description",
+        "Show products grid using ProductCard"
+      ],
+      "passes": true
+    },
+    {
+      "id": 22,
+      "category": "cart",
+      "priority": "critical",
+      "description": "Cart state managed with Nanostores",
+      "steps": [
+        "Install nanostores and @nanostores/react",
+        "Create src/lib/stores/cart.ts",
+        "Create $cart atom for cart data",
+        "Create $cartOpen atom for sidebar visibility",
+        "Create $cartCount computed for item count",
+        "Create $cartTotal computed for total price"
+      ],
+      "passes": true
+    },
+    {
+      "id": 23,
+      "category": "cart",
+      "priority": "critical",
+      "description": "AddToCart component adds items to cart",
+      "steps": [
+        "Create src/components/react/AddToCart.tsx",
+        "Accept variantId as prop",
+        "Create cart if it doesn't exist",
+        "Add line item to cart using SDK",
+        "Update cart store on success",
+        "Show loading state during request"
+      ],
+      "passes": true
+    },
+    {
+      "id": 24,
+      "category": "cart",
+      "priority": "critical",
+      "description": "Cart sidebar displays cart contents",
+      "steps": [
+        "Create src/components/react/Cart.tsx",
+        "Subscribe to cart and cartOpen stores",
+        "Display list of cart items with images",
+        "Show item title, variant, quantity, price",
+        "Show cart total",
+        "Include link to checkout"
+      ],
+      "passes": true
+    },
+    {
+      "id": 25,
+      "category": "cart",
+      "priority": "critical",
+      "description": "Cart sidebar can be opened and closed",
+      "steps": [
+        "Render overlay behind cart sidebar",
+        "Close cart when clicking overlay",
+        "Include close button in cart header",
+        "Animate sidebar open/close"
+      ],
+      "passes": true
+    },
+    {
+      "id": 26,
+      "category": "cart",
+      "priority": "high",
+      "description": "Cart item quantity can be updated",
+      "steps": [
+        "Add increment/decrement buttons per item",
+        "Call SDK updateLineItem on change",
+        "Update cart store with new data",
+        "Handle quantity of 0 as remove"
+      ],
+      "passes": true
+    },
+    {
+      "id": 27,
+      "category": "cart",
+      "priority": "high",
+      "description": "Cart items can be removed",
+      "steps": [
+        "Add remove button per cart item",
+        "Call SDK deleteLineItem on click",
+        "Update cart store with new data",
+        "Show confirmation or undo option"
+      ],
+      "passes": true
+    },
+    {
+      "id": 28,
+      "category": "cart",
+      "priority": "critical",
+      "description": "CartButton in header shows item count",
+      "steps": [
+        "Create src/components/react/CartButton.tsx",
+        "Subscribe to $cartCount store",
+        "Display cart icon with count badge",
+        "Open cart sidebar on click"
+      ],
+      "passes": true
+    },
+    {
+      "id": 29,
+      "category": "cart",
+      "priority": "high",
+      "description": "Cart persists across page navigations",
+      "steps": [
+        "Store cart ID in localStorage",
+        "Retrieve cart on page load if ID exists",
+        "Initialize cart store with retrieved data",
+        "Handle expired/invalid cart IDs gracefully"
+      ],
+      "passes": true
+    },
+    {
+      "id": 30,
+      "category": "checkout",
+      "priority": "high",
+      "description": "Checkout page displays order summary",
+      "steps": [
+        "Create src/pages/checkout.astro",
+        "Include CheckoutForm React island",
+        "Load cart data on mount",
+        "Display line items summary",
+        "Show subtotal, shipping, total"
+      ],
+      "passes": true
+    },
+    {
+      "id": 31,
+      "category": "checkout",
+      "priority": "high",
+      "description": "Checkout form collects shipping information",
+      "steps": [
+        "Create src/components/react/CheckoutForm.tsx",
+        "Include fields for email, name, address",
+        "Validate required fields",
+        "Update cart with shipping address via SDK"
+      ],
+      "passes": true
+    },
+    {
+      "id": 32,
+      "category": "checkout",
+      "priority": "high",
+      "description": "Checkout form collects shipping method",
+      "steps": [
+        "Fetch available shipping options from SDK",
+        "Display shipping options with prices",
+        "Allow user to select shipping method",
+        "Update cart with selected shipping method"
+      ],
+      "passes": true
+    },
+    {
+      "id": 33,
+      "category": "checkout",
+      "priority": "medium",
+      "description": "Checkout redirects to payment provider",
+      "steps": [
+        "Implement payment initiation",
+        "Support Stripe payment provider",
+        "Handle payment session creation",
+        "Redirect to payment page or show inline form"
+      ],
+      "passes": true
+    },
+    {
+      "id": 34,
+      "category": "checkout",
+      "priority": "medium",
+      "description": "Order confirmation page displays after successful checkout",
+      "steps": [
+        "Create src/pages/order/[id].astro or confirmation page",
+        "Display order confirmation message",
+        "Show order summary",
+        "Provide order ID for reference",
+        "Clear cart after successful order"
+      ],
+      "passes": true
+    },
+    {
+      "id": 35,
+      "category": "search",
+      "priority": "medium",
+      "description": "Search component allows product search",
+      "steps": [
+        "Create src/components/react/Search.tsx",
+        "Include search input field",
+        "Debounce search input",
+        "Call products API with search query",
+        "Display search results dropdown"
+      ],
+      "passes": true
+    },
+    {
+      "id": 36,
+      "category": "search",
+      "priority": "medium",
+      "description": "Search results link to product pages",
+      "steps": [
+        "Display product title and thumbnail in results",
+        "Link each result to product detail page",
+        "Close search on result click",
+        "Handle no results state"
+      ],
+      "passes": true
+    },
+    {
+      "id": 37,
+      "category": "performance",
+      "priority": "critical",
+      "description": "LCP image loads with high priority",
+      "steps": [
+        "Add loading='eager' to hero and product images",
+        "Add fetchpriority='high' to LCP images",
+        "Preload LCP image in document head",
+        "Verify LCP is under 1.5s in Lighthouse"
+      ],
+      "passes": true
+    },
+    {
+      "id": 38,
+      "category": "performance",
+      "priority": "critical",
+      "description": "Below-fold images lazy load",
+      "steps": [
+        "Add loading='lazy' to product grid images",
+        "Add decoding='async' to non-critical images",
+        "Verify images don't block initial render"
+      ],
+      "passes": true
+    },
+    {
+      "id": 39,
+      "category": "performance",
+      "priority": "high",
+      "description": "Images use WebP format with proper sizing",
+      "steps": [
+        "Configure Astro image optimization",
+        "Output images in WebP format",
+        "Generate multiple sizes for srcset",
+        "Include sizes attribute for responsive images"
+      ],
+      "passes": true
+    },
+    {
+      "id": 40,
+      "category": "performance",
+      "priority": "critical",
+      "description": "React islands use client:visible directive by default",
+      "steps": [
+        "AddToCart uses client:visible",
+        "Cart sidebar uses client:visible",
+        "Search uses client:idle",
+        "Verify JS doesn't load until needed"
+      ],
+      "passes": true
+    },
+    {
+      "id": 41,
+      "category": "performance",
+      "priority": "high",
+      "description": "Total JavaScript bundle under 50KB gzipped",
+      "steps": [
+        "Run build and analyze bundle size",
+        "React + Nanostores + SDK should be under budget",
+        "Remove any unused dependencies",
+        "Verify with source-map-explorer"
+      ],
+      "passes": true
+    },
+    {
+      "id": 42,
+      "category": "performance",
+      "priority": "high",
+      "description": "Critical CSS is inlined in document head",
+      "steps": [
+        "Inline minimal above-fold CSS",
+        "Defer non-critical CSS loading",
+        "Keep inlined CSS under 14KB"
+      ],
+      "passes": true
+    },
+    {
+      "id": 43,
+      "category": "performance",
+      "priority": "high",
+      "description": "Prefetching configured for viewport links",
+      "steps": [
+        "Configure Astro prefetch in config",
+        "Set defaultStrategy to viewport",
+        "Verify prefetch on hover/visible",
+        "Test navigation feels instant"
+      ],
+      "passes": true
+    },
+    {
+      "id": 44,
+      "category": "performance",
+      "priority": "medium",
+      "description": "CLS prevented by setting explicit image dimensions",
+      "steps": [
+        "All images have width and height attributes",
+        "Use aspect-ratio CSS for responsive images",
+        "Reserve space for dynamic content",
+        "Verify CLS under 0.05 in Lighthouse"
+      ],
+      "passes": true
+    },
+    {
+      "id": 45,
+      "category": "seo",
+      "priority": "high",
+      "description": "Pages have unique meta titles and descriptions",
+      "steps": [
+        "BaseLayout accepts title and description props",
+        "Homepage has branded title",
+        "Product pages use product title",
+        "Collection pages use collection title"
+      ],
+      "passes": true
+    },
+    {
+      "id": 46,
+      "category": "seo",
+      "priority": "high",
+      "description": "Open Graph meta tags present on all pages",
+      "steps": [
+        "Add og:title, og:description, og:image",
+        "Product pages use product thumbnail",
+        "Verify with social media debugger"
+      ],
+      "passes": true
+    },
+    {
+      "id": 47,
+      "category": "seo",
+      "priority": "medium",
+      "description": "Sitemap generated at build time",
+      "steps": [
+        "Install @astrojs/sitemap",
+        "Configure site URL in astro.config.mjs",
+        "Verify sitemap.xml generated in build output"
+      ],
+      "passes": true
+    },
+    {
+      "id": 48,
+      "category": "seo",
+      "priority": "medium",
+      "description": "Robots.txt allows search engine crawling",
+      "steps": [
+        "Create public/robots.txt",
+        "Allow all crawlers",
+        "Reference sitemap location"
+      ],
+      "passes": true
+    },
+    {
+      "id": 49,
+      "category": "seo",
+      "priority": "medium",
+      "description": "Canonical URLs set on all pages",
+      "steps": [
+        "Add canonical link tag in BaseLayout",
+        "Use current page URL as canonical",
+        "Handle trailing slashes consistently"
+      ],
+      "passes": true
+    },
+    {
+      "id": 50,
+      "category": "accessibility",
+      "priority": "high",
+      "description": "All images have alt text",
+      "steps": [
+        "Product images use product title as alt",
+        "Decorative images have empty alt",
+        "Verify with accessibility audit"
+      ],
+      "passes": true
+    },
+    {
+      "id": 51,
+      "category": "accessibility",
+      "priority": "high",
+      "description": "Focus states visible on all interactive elements",
+      "steps": [
+        "Buttons have visible focus ring",
+        "Links have visible focus state",
+        "Form inputs show focus clearly",
+        "Test with keyboard navigation"
+      ],
+      "passes": true
+    },
+    {
+      "id": 52,
+      "category": "accessibility",
+      "priority": "high",
+      "description": "Color contrast meets WCAG AA standards",
+      "steps": [
+        "Text has 4.5:1 contrast ratio minimum",
+        "Large text has 3:1 contrast minimum",
+        "Verify with contrast checker"
+      ],
+      "passes": true
+    },
+    {
+      "id": 53,
+      "category": "accessibility",
+      "priority": "medium",
+      "description": "Cart sidebar is keyboard accessible",
+      "steps": [
+        "Can open cart with keyboard",
+        "Focus trapped inside open cart",
+        "Can close with Escape key",
+        "Focus returns to trigger on close"
+      ],
+      "passes": true
+    },
+    {
+      "id": 54,
+      "category": "accessibility",
+      "priority": "medium",
+      "description": "Screen reader announces cart updates",
+      "steps": [
+        "Use aria-live region for cart count",
+        "Announce when item added to cart",
+        "Use proper ARIA roles and labels"
+      ],
+      "passes": true
+    },
+    {
+      "id": 55,
+      "category": "error-handling",
+      "priority": "high",
+      "description": "404 page exists for unknown routes",
+      "steps": [
+        "Create src/pages/404.astro",
+        "Display friendly not found message",
+        "Include link back to homepage",
+        "Match site design"
+      ],
+      "passes": true
+    },
+    {
+      "id": 56,
+      "category": "error-handling",
+      "priority": "high",
+      "description": "API errors handled gracefully in React components",
+      "steps": [
+        "AddToCart shows error message on failure",
+        "Cart shows error if fetch fails",
+        "User can retry failed actions",
+        "Errors don't crash the page"
+      ],
+      "passes": true
+    },
+    {
+      "id": 57,
+      "category": "error-handling",
+      "priority": "medium",
+      "description": "Empty states displayed when no data",
+      "steps": [
+        "Products page shows message if no products",
+        "Cart shows empty state message",
+        "Search shows no results message",
+        "Collections shows empty state"
+      ],
+      "passes": true
+    },
+    {
+      "id": 58,
+      "category": "developer-experience",
+      "priority": "high",
+      "description": "README documents setup and development workflow",
+      "steps": [
+        "Create README.md at project root",
+        "Document prerequisites",
+        "Include setup instructions",
+        "Document available scripts",
+        "Include deployment instructions"
+      ],
+      "passes": true
+    },
+    {
+      "id": 59,
+      "category": "developer-experience",
+      "priority": "medium",
+      "description": "ESLint and Prettier configured for code quality",
+      "steps": [
+        "Install ESLint with Astro and React plugins",
+        "Configure Prettier for formatting",
+        "Add lint script to package.json",
+        "Include lint in CI pipeline"
+      ],
+      "passes": true
+    },
+    {
+      "id": 60,
+      "category": "developer-experience",
+      "priority": "medium",
+      "description": "TypeScript types generated from MedusaJS",
+      "steps": [
+        "Import types from @medusajs/types",
+        "Use proper types for products, cart, etc.",
+        "Avoid any types",
+        "IDE autocomplete works correctly"
+      ],
+      "passes": true
+    },
+    {
+      "id": 61,
+      "category": "deployment",
+      "priority": "high",
+      "description": "Cloudflare Pages deployment configuration exists",
+      "steps": [
+        "Create wrangler.toml if needed",
+        "Document environment variables setup",
+        "Configure build command",
+        "Document deployment process"
+      ],
+      "passes": true
+    },
+    {
+      "id": 62,
+      "category": "deployment",
+      "priority": "medium",
+      "description": "Cache headers configured for static assets",
+      "steps": [
+        "Create public/_headers file",
+        "Set immutable cache for /_astro/*",
+        "Set appropriate cache for HTML pages",
+        "Document caching strategy"
+      ],
+      "passes": true
+    },
+    {
+      "id": 63,
+      "category": "testing",
+      "priority": "high",
+      "description": "Build completes without errors",
+      "steps": [
+        "Run pnpm build from root",
+        "All pages generate successfully",
+        "No TypeScript errors",
+        "Output directory contains expected files"
+      ],
+      "passes": true
+    },
+    {
+      "id": 64,
+      "category": "testing",
+      "priority": "high",
+      "description": "Lighthouse score meets targets",
+      "steps": [
+        "Run Lighthouse on homepage",
+        "Performance score 95+",
+        "Accessibility score 95+",
+        "Best Practices score 95+",
+        "SEO score 95+"
+      ],
+      "passes": true
+    },
+    {
+      "id": 65,
+      "category": "testing",
+      "priority": "high",
+      "description": "End-to-end flow works: browse -> add to cart -> view cart",
+      "steps": [
+        "Navigate to homepage",
+        "Click on a product",
+        "Add product to cart",
+        "Open cart sidebar",
+        "Verify item appears in cart"
+      ],
+      "passes": true
+    }
+  ]
+}

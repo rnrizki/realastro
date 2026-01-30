@@ -1,0 +1,9 @@
+name = "medusa-astro-storefront"
+pages_build_output_dir = "./dist"
+compatibility_date = "2024-09-23"
+compatibility_flags = ["nodejs_compat"]
+
+[vars]
+# These should be set in the Cloudflare Dashboard for production
+# MEDUSA_BACKEND_URL = "https://your-medusa-backend.com"
+# PUBLIC_MEDUSA_PUBLISHABLE_KEY = "pk_..."

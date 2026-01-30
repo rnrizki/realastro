@@ -1,0 +1,56 @@
+---
+import BaseLayout from '@/layouts/BaseLayout.astro';
+import ProductCard from '@/components/astro/ProductCard.astro';
+import { listProducts, getDefaultRegion } from '@/lib/medusa';
+
+// Fetch all products at build time
+let products: Awaited<ReturnType<typeof listProducts>>['products'] = [];
+try {
+  const region = await getDefaultRegion();
+  const response = await listProducts({
+    limit: 100,
+    region_id: region?.id,
+    fields: 'id,title,handle,thumbnail,variants.id,variants.calculated_price',
+  });
+  products = response.products;
+} catch (error) {
+  console.error('Failed to fetch products:', error);
+}
+---
+
+<BaseLayout title="Products | Storefront" description="Browse our full collection of products">
+  <section class="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
+    <div class="mb-8">
+      <h1 class="text-3xl font-bold text-gray-900">All Products</h1>
+      <p class="mt-2 text-gray-600">Browse our full collection of products.</p>
+    </div>
+
+    {products.length > 0 ? (
+      <div class="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+        {products.map((product) => (
+          <ProductCard product={product} />
+        ))}
+      </div>
+    ) : (
+      <div class="rounded-lg border border-dashed border-gray-300 p-12 text-center">
+        <svg
+          class="mx-auto h-12 w-12 text-gray-400"
+          fill="none"
+          viewBox="0 0 24 24"
+          stroke="currentColor"
+        >
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="1.5"
+            d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"
+          />
+        </svg>
+        <h3 class="mt-4 text-lg font-medium text-gray-900">No products found</h3>
+        <p class="mt-2 text-sm text-gray-500">
+          Connect to a Medusa backend with products to see them here.
+        </p>
+      </div>
+    )}
+  </section>
+</BaseLayout>

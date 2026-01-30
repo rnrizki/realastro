@@ -1,0 +1,23 @@
+{
+  "name": "medusa-astro-starter",
+  "author": "Christian Anese <christian.anese@gmail.com>",
+  "private": false,
+  "packageManager": "pnpm@10.11.1",
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "dev": "pnpm -r dev",
+    "build": "pnpm -r build",
+    "start": "turbo start",
+    "lint": "turbo lint",
+    "test": "turbo test",
+    "backend:seed": "turbo seed --filter=@canese/backend",
+    "backend:dev": "turbo dev --filter=@canese/backend",
+    "storefront:dev": "turbo dev --filter=@canese/storefront"
+  },
+  "devDependencies": {
+    "turbo": "^2.0.14",
+    "prettier": "^3.2.5"
+  }
+}

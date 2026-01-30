@@ -1,0 +1,105 @@
+---
+import '@/styles/global.css';
+import Cart from '@/components/react/Cart';
+import CartInitializer from '@/components/react/CartInitializer';
+import CartAnnouncer from '@/components/react/CartAnnouncer';
+import Header from '@/components/astro/Header.astro';
+import Footer from '@/components/astro/Footer.astro';
+
+interface Props {
+  title?: string;
+  description?: string;
+  preloadImage?: string;
+  image?: string;
+}
+
+const { title = 'Storefront', description = 'A fast MedusaJS storefront', preloadImage, image } = Astro.props;
+const currentPath = Astro.url.pathname;
+const canonicalURL = new URL(currentPath, Astro.site || Astro.url.origin).href;
+const ogImage = image || '/og-default.png';
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content={description} />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+
+    <!-- Critical CSS: Above-fold styles inlined for fast first paint -->
+    <style is:inline>
+      /* Reset and base */
+      *,*::before,*::after{box-sizing:border-box}
+      body{margin:0;min-height:100vh;background-color:#fff;color:#111827;font-family:system-ui,-apple-system,sans-serif;line-height:1.5}
+      /* Header critical styles */
+      .sticky{position:sticky}.top-0{top:0}.z-40{z-index:40}
+      .bg-white{background-color:#fff}.bg-gray-50{background-color:#f9fafb}
+      .border-b{border-bottom-width:1px}.border-gray-200{border-color:#e5e7eb}
+      /* Layout utilities */
+      .mx-auto{margin-left:auto;margin-right:auto}.max-w-7xl{max-width:80rem}
+      .flex{display:flex}.items-center{align-items:center}.justify-between{justify-content:space-between}
+      .gap-4{gap:1rem}.gap-6{gap:1.5rem}
+      .px-4{padding-left:1rem;padding-right:1rem}.py-4{padding-top:1rem;padding-bottom:1rem}
+      .py-16{padding-top:4rem;padding-bottom:4rem}
+      /* Typography critical */
+      .text-center{text-align:center}
+      .text-xl{font-size:1.25rem;line-height:1.75rem}
+      .text-2xl{font-size:1.5rem;line-height:2rem}
+      .text-4xl{font-size:2.25rem;line-height:2.5rem}
+      .text-lg{font-size:1.125rem;line-height:1.75rem}
+      .text-sm{font-size:.875rem;line-height:1.25rem}
+      .font-bold{font-weight:700}.font-medium{font-weight:500}
+      .tracking-tight{letter-spacing:-.025em}
+      .text-gray-900{color:#111827}.text-gray-600{color:#4b5563}.text-gray-700{color:#374151}
+      .text-blue-600{color:#2563eb}.text-indigo-600{color:#4f46e5}
+      .text-white{color:#fff}
+      /* Hero buttons critical */
+      .inline-flex{display:inline-flex}.rounded-md{border-radius:.375rem}
+      .bg-blue-600{background-color:#2563eb}.border{border-width:1px}.border-gray-300{border-color:#d1d5db}
+      .px-6{padding-left:1.5rem;padding-right:1.5rem}.py-3{padding-top:.75rem;padding-bottom:.75rem}
+      .shadow-sm{box-shadow:0 1px 2px 0 rgb(0 0 0/.05)}
+      /* Responsive */
+      @media(min-width:640px){.sm\:px-6{padding-left:1.5rem;padding-right:1.5rem}.sm\:py-24{padding-top:6rem;padding-bottom:6rem}.sm\:text-5xl{font-size:3rem;line-height:1}.sm\:flex{display:flex}}
+      @media(min-width:768px){.md\:text-6xl{font-size:3.75rem;line-height:1}}
+      @media(min-width:1024px){.lg\:px-8{padding-left:2rem;padding-right:2rem}}
+      /* Grid for product cards */
+      .grid{display:grid}.grid-cols-1{grid-template-columns:repeat(1,minmax(0,1fr))}
+      @media(min-width:640px){.sm\:grid-cols-2{grid-template-columns:repeat(2,minmax(0,1fr))}}
+      @media(min-width:1024px){.lg\:grid-cols-4{grid-template-columns:repeat(4,minmax(0,1fr))}}
+      /* Hidden utilities */
+      .hidden{display:none}@media(min-width:640px){.sm\:flex{display:flex}}
+    </style>
+
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content={canonicalURL} />
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={description} />
+    <meta property="og:image" content={ogImage} />
+
+    <!-- Twitter -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:url" content={canonicalURL} />
+    <meta name="twitter:title" content={title} />
+    <meta name="twitter:description" content={description} />
+    <meta name="twitter:image" content={ogImage} />
+
+    <link rel="canonical" href={canonicalURL} />
+
+    {preloadImage && (
+      <link rel="preload" as="image" href={preloadImage} fetchpriority="high" />
+    )}
+    <title>{title}</title>
+  </head>
+  <body class="min-h-screen bg-white text-gray-900 flex flex-col">
+    <CartInitializer client:load />
+    <CartAnnouncer client:idle />
+    <Header currentPath={currentPath} />
+    <main class="flex-grow">
+      <slot />
+    </main>
+    <Footer />
+    <Cart client:idle />
+  </body>
+</html>

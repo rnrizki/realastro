@@ -1,0 +1,113 @@
+---
+import BaseLayout from "@/layouts/BaseLayout.astro";
+import { listProducts, getProductByHandle, getDefaultRegion } from "@/lib/medusa";
+import type { StoreProduct } from "@medusajs/types";
+
+export async function getStaticPaths() {
+  try {
+    // Fetch region for pricing context
+    const region = await getDefaultRegion();
+    // Fetch all products at build time
+    const { products } = await listProducts({
+      limit: 100,
+      region_id: region?.id,
+      fields: '*variants.calculated_price',
+    });
+
+    return products.map((product) => ({
+      params: { handle: product.handle },
+      props: { product },
+    }));
+  } catch (error) {
+    console.error("Failed to fetch products for static paths:", error);
+    // Return empty array to allow build to pass without backend
+    return [];
+  }
+}
+
+interface Props {
+  product: StoreProduct;
+}
+
+const { handle } = Astro.params;
+const { product } = Astro.props;
+
+// If product wasn't passed via getStaticPaths (shouldn't happen in static mode),
+// fetch it directly
+let productData = product;
+if (!productData && handle) {
+  productData = await getProductByHandle(handle);
+}
+
+// Handle 404 for non-existent products
+if (!productData) {
+  return Astro.redirect("/404");
+}
+
+import { getImage } from "astro:assets";
+import ProductActions from "@/components/react/ProductActions";
+import ProductImageGallery from "@/components/react/ProductImageGallery";
+
+// Get the main image
+const mainImage = productData.thumbnail || productData.images?.[0]?.url;
+
+// Optimize images for the gallery
+const optimizedImages = await Promise.all(
+  (productData.images || []).map(async (img) => {
+    try {
+      const optimized = await getImage({ src: img.url, width: 1000, height: 1000, format: "webp" });
+      return { ...img, url: optimized.src };
+    } catch (e) {
+      console.error(`Failed to optimize image ${img.url}`, e);
+      return img;
+    }
+  })
+);
+
+const optimizedThumbnail = productData.thumbnail
+  ? await (async () => {
+      try {
+        const opt = await getImage({ src: productData.thumbnail!, width: 1000, height: 1000, format: "webp" });
+        return opt.src;
+      } catch (e) {
+        return productData.thumbnail;
+      }
+    })()
+  : productData.thumbnail;
+
+---
+
+<BaseLayout title={`${productData.title} | Storefront`} description={productData.description || `Buy ${productData.title}`} preloadImage={mainImage} image={mainImage}>
+  <main class="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
+    <nav class="mb-6">
+      <a href="/products" class="text-sm text-gray-500 hover:text-gray-700">
+        ← Back to products
+      </a>
+    </nav>
+
+    <div class="grid gap-8 md:grid-cols-2">
+      <!-- Product Image -->
+      <div>
+        <ProductImageGallery
+          client:load
+          images={optimizedImages}
+          thumbnail={optimizedThumbnail}
+          title={productData.title}
+        />
+      </div>
+
+      <!-- Product Info -->
+      <div class="flex flex-col">
+        <h1 class="text-3xl font-bold text-gray-900">{productData.title}</h1>
+
+        <div class="mt-4">
+          <ProductActions product={productData} client:load />
+        </div>
+
+        {productData.description && (
+          <div class="mt-6 prose prose-sm text-gray-600" set:html={productData.description} />
+        )}
+      </div>
+    </div>
+  </main>
+</BaseLayout>

@@ -1,0 +1,87 @@
+---
+import BaseLayout from '@/layouts/BaseLayout.astro';
+import ProductCard from '@/components/astro/ProductCard.astro';
+import { listProducts, getDefaultRegion } from '@/lib/medusa';
+
+// Fetch featured products at build time
+let products: Awaited<ReturnType<typeof listProducts>>['products'] = [];
+try {
+  const region = await getDefaultRegion();
+  const response = await listProducts({
+    limit: 8,
+    region_id: region?.id,
+    fields: 'id,title,handle,thumbnail,variants.id,variants.calculated_price',
+  });
+  products = response.products;
+} catch (error) {
+  console.error('Failed to fetch products:', error);
+}
+---
+
+<BaseLayout title="Home | Storefront" description="Discover our collection of premium products">
+  <!-- Hero Section -->
+  <section class="bg-gray-50">
+    <div class="mx-auto max-w-7xl px-4 py-16 sm:px-6 sm:py-24 lg:px-8">
+      <div class="text-center">
+        <h1 class="text-4xl font-bold tracking-tight text-gray-900 sm:text-5xl md:text-6xl">
+          Welcome to <span class="text-blue-600">Storefront</span>
+        </h1>
+        <p class="mx-auto mt-6 max-w-2xl text-lg text-gray-600">
+          Discover our curated collection of premium products. Built with Astro and MedusaJS for blazing-fast performance.
+        </p>
+        <div class="mt-8 flex justify-center gap-4">
+          <a
+            href="/products"
+            class="inline-flex items-center rounded-md bg-blue-600 px-6 py-3 text-base font-medium text-white shadow-sm hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+          >
+            Shop All Products
+          </a>
+          <a
+            href="/collections"
+            class="inline-flex items-center rounded-md border border-gray-300 bg-white px-6 py-3 text-base font-medium text-gray-700 shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+          >
+            Browse Collections
+          </a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Featured Products Section -->
+  <section class="mx-auto max-w-7xl px-4 py-16 sm:px-6 lg:px-8">
+    <div class="flex items-center justify-between">
+      <h2 class="text-2xl font-bold text-gray-900">Featured Products</h2>
+      <a href="/products" class="text-sm font-medium text-blue-600 hover:text-blue-500">
+        View all &rarr;
+      </a>
+    </div>
+
+    {products.length > 0 ? (
+      <div class="mt-8 grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
+        {products.map((product) => (
+          <ProductCard product={product} />
+        ))}
+      </div>
+    ) : (
+      <div class="mt-8 rounded-lg border border-dashed border-gray-300 p-12 text-center">
+        <svg
+          class="mx-auto h-12 w-12 text-gray-400"
+          fill="none"
+          viewBox="0 0 24 24"
+          stroke="currentColor"
+        >
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="1.5"
+            d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"
+          />
+        </svg>
+        <h3 class="mt-4 text-lg font-medium text-gray-900">No products found</h3>
+        <p class="mt-2 text-sm text-gray-500">
+          Connect to a Medusa backend with products to see them here.
+        </p>
+      </div>
+    )}
+  </section>
+</BaseLayout>

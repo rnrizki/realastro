@@ -1,0 +1,94 @@
+---
+import { Image } from "astro:assets";
+import BaseLayout from '@/layouts/BaseLayout.astro';
+import { listCollections } from '@/lib/medusa';
+import type { StoreCollection } from '@medusajs/types';
+
+// Fetch all collections at build time
+let collections: StoreCollection[] = [];
+try {
+  const response = await listCollections({ limit: 100 });
+  collections = response.collections;
+} catch (error) {
+  console.error('Failed to fetch collections:', error);
+}
+---
+
+<BaseLayout title="Collections | Storefront" description="Browse our product collections">
+  <section class="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
+    <div class="mb-8">
+      <h1 class="text-3xl font-bold text-gray-900">Collections</h1>
+      <p class="mt-2 text-gray-600">Browse our curated product collections</p>
+    </div>
+
+    {collections.length > 0 ? (
+      <div class="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
+        {collections.map((collection) => (
+          <a
+            href={`/collections/${collection.handle}`}
+            class="group block overflow-hidden rounded-lg border border-gray-200 bg-white transition-shadow hover:shadow-md"
+          >
+            <div class="aspect-[16/9] overflow-hidden bg-gray-100">
+              {collection.metadata?.image ? (
+                <Image
+                  src={collection.metadata.image as string}
+                  alt={collection.title}
+                  width={600}
+                  height={338}
+                  class="h-full w-full object-cover object-center transition-transform duration-300 group-hover:scale-105"
+                />
+              ) : (
+                <div class="flex h-full w-full items-center justify-center text-gray-400">
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    class="h-16 w-16"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                  >
+                    <path
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      stroke-width="1.5"
+                      d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"
+                    />
+                  </svg>
+                </div>
+              )}
+            </div>
+            <div class="p-4">
+              <h2 class="text-lg font-semibold text-gray-900 group-hover:text-blue-600">
+                {collection.title}
+              </h2>
+              {collection.metadata?.description && (
+                <p class="mt-1 text-sm text-gray-600 line-clamp-2">
+                  {collection.metadata.description as string}
+                </p>
+              )}
+            </div>
+          </a>
+        ))}
+      </div>
+    ) : (
+      <div class="rounded-lg border border-dashed border-gray-300 p-12 text-center">
+        <svg
+          class="mx-auto h-12 w-12 text-gray-400"
+          fill="none"
+          viewBox="0 0 24 24"
+          stroke="currentColor"
+        >
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="1.5"
+            d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"
+          />
+        </svg>
+        <h3 class="mt-4 text-lg font-medium text-gray-900">No collections found</h3>
+        <p class="mt-2 text-sm text-gray-500">
+          Connect to a Medusa backend with collections to see them here.
+        </p>
+      </div>
+    )}
+  </section>
+</BaseLayout>

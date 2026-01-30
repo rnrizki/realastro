@@ -1,0 +1,36 @@
+# Cloudflare Pages cache headers
+# https://developers.cloudflare.com/pages/configuration/headers/
+
+# Astro hashed assets - immutable, cache forever
+/_astro/*
+  Cache-Control: public, max-age=31536000, immutable
+
+# HTML pages - short cache, must revalidate
+/*.html
+  Cache-Control: public, max-age=0, must-revalidate
+
+/
+  Cache-Control: public, max-age=0, must-revalidate
+
+# Sitemap and robots - moderate cache
+/sitemap*.xml
+  Cache-Control: public, max-age=3600
+
+/robots.txt
+  Cache-Control: public, max-age=3600
+
+# Images in public folder (if any) - long cache
+/*.png
+  Cache-Control: public, max-age=86400
+
+/*.jpg
+  Cache-Control: public, max-age=86400
+
+/*.svg
+  Cache-Control: public, max-age=86400
+
+/*.webp
+  Cache-Control: public, max-age=86400
+
+/*.ico
+  Cache-Control: public, max-age=86400

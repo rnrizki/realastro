@@ -1,0 +1,110 @@
+---
+import BaseLayout from '@/layouts/BaseLayout.astro';
+import ProductCard from '@/components/astro/ProductCard.astro';
+import { listCollections, getCollectionByHandle, getProductsByCollection } from '@/lib/medusa';
+import type { StoreCollection, StoreProduct } from '@medusajs/types';
+
+export async function getStaticPaths() {
+  try {
+    const { collections } = await listCollections({ limit: 100 });
+    return collections.map((collection) => ({
+      params: { handle: collection.handle },
+      props: { collectionId: collection.id },
+    }));
+  } catch (error) {
+    console.error('Failed to fetch collections for static paths:', error);
+    return [];
+  }
+}
+
+const { handle } = Astro.params;
+const { collectionId } = Astro.props as { collectionId: string };
+
+// Fetch collection details and products
+let collection: StoreCollection | null = null;
+let products: StoreProduct[] = [];
+
+try {
+  collection = await getCollectionByHandle(handle!);
+  if (collection) {
+    const response = await getProductsByCollection(collectionId, { limit: 100 });
+    products = response.products;
+  }
+} catch (error) {
+  console.error('Failed to fetch collection data:', error);
+}
+
+// Handle 404
+if (!collection) {
+  return Astro.redirect('/404');
+}
+
+const title = `${collection.title} | Storefront`;
+const description = (collection.metadata?.description as string) || `Browse products in ${collection.title}`;
+const collectionImage = products[0]?.thumbnail || undefined;
+---
+
+<BaseLayout title={title} description={description} image={collectionImage}>
+  <section class="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
+    <!-- Breadcrumb -->
+    <nav class="mb-6 text-sm">
+      <ol class="flex items-center space-x-2">
+        <li>
+          <a href="/" class="text-gray-500 hover:text-gray-700">Home</a>
+        </li>
+        <li class="text-gray-400">/</li>
+        <li>
+          <a href="/collections" class="text-gray-500 hover:text-gray-700">Collections</a>
+        </li>
+        <li class="text-gray-400">/</li>
+        <li class="text-gray-900 font-medium">{collection.title}</li>
+      </ol>
+    </nav>
+
+    <!-- Collection Header -->
+    <div class="mb-8">
+      <h1 class="text-3xl font-bold text-gray-900">{collection.title}</h1>
+      {collection.metadata?.description && (
+        <p class="mt-2 text-gray-600">{collection.metadata.description as string}</p>
+      )}
+      <p class="mt-2 text-sm text-gray-500">
+        {products.length} {products.length === 1 ? 'product' : 'products'}
+      </p>
+    </div>
+
+    <!-- Products Grid -->
+    {products.length > 0 ? (
+      <div class="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+        {products.map((product) => (
+          <ProductCard product={product} />
+        ))}
+      </div>
+    ) : (
+      <div class="rounded-lg border border-dashed border-gray-300 p-12 text-center">
+        <svg
+          class="mx-auto h-12 w-12 text-gray-400"
+          fill="none"
+          viewBox="0 0 24 24"
+          stroke="currentColor"
+        >
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="1.5"
+            d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"
+          />
+        </svg>
+        <h3 class="mt-4 text-lg font-medium text-gray-900">No products in this collection</h3>
+        <p class="mt-2 text-sm text-gray-500">
+          Check back later for new additions.
+        </p>
+        <a
+          href="/products"
+          class="mt-4 inline-block text-sm font-medium text-blue-600 hover:text-blue-500"
+        >
+          Browse all products
+        </a>
+      </div>
+    )}
+  </section>
+</BaseLayout>
